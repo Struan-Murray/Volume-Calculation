@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <chrono>
+#include <string>
 
 #include "PrintIntro.h"
 
@@ -14,6 +15,7 @@ double cylinderVolume(double, double);
 double rectangularVolume(double, double, double);
 
 void printVatOptions();
+std::string printFormattedTime(std::chrono::high_resolution_clock::time_point, std::chrono::high_resolution_clock::time_point);
 
 enum Vat_Shapes{BEGIN = 0, CYLINDER, CYLINDERSPHERICALCAP, RECTANGLE, SQUARE, END};
 
@@ -21,7 +23,7 @@ int main()
 {
 	std::chrono::high_resolution_clock::time_point time_start = std::chrono::high_resolution_clock::now(), time_end = std::chrono::high_resolution_clock::now();
 
-	printIntro("Vat volume calculator",2018,12,06,0);
+	printIntro("Vat volume calculator",2018,12,12,0);
 	std::cout << "Instructions, and the latest version of this program should be available from: " << std::endl;
 	std::cout << "https://github.com/Struan-Murray/Volume-Calculation" << std::endl << std::endl;
 
@@ -29,8 +31,6 @@ int main()
 	std::ofstream vatFile;
 	int_fast16_t introLines{0};
 	double step{0.0}, depth{0.0}, width{0.0}, breadth{0.0}, side{0.0}, radius{0.0}, bottomH{0.0}, bottomV{0.0};
-
-
 
 	std::cout << "Vat Company: ";
 	getline(std::cin, companyName); // Allows company names with spaces to be used.
@@ -170,7 +170,7 @@ int main()
 	{
 		if(width > 2*radius)
 		{
-			std::cout << "IMPOSSIBLE RADIUS";
+			std::cout << "IMPOSSIBLE RADIUS\n";
 			return -2;
 		}
 	}
@@ -233,7 +233,8 @@ int main()
 
 	time_end = std::chrono::high_resolution_clock::now();
 
-	std::cout << "Calculations complete in " << std::chrono::duration_cast<std::chrono::microseconds>(time_end-time_start).count() << " microseconds." << std::endl;
+	std::cout << "\n";
+	std::cout << "Calculations complete in " << printFormattedTime(time_start, time_end) << std::endl;
 
 	time_start = std::chrono::high_resolution_clock::now();
 
@@ -244,7 +245,7 @@ int main()
 
 	time_end = std::chrono::high_resolution_clock::now();
 
-	std::cout << "File writing complete in " << std::chrono::duration_cast<std::chrono::milliseconds>(time_end-time_start).count() << " milliseconds." << std::endl;
+	std::cout << "File writing complete in "<< printFormattedTime(time_start, time_end) << std::endl;
 
 	delete[] v;
 
@@ -284,4 +285,16 @@ double cylinderSphericalCapVolume(double height = 1.0, double radius = 1.0, doub
 	{
 		return cylinderVolume(height-bottomH, width) + bottomV;
 	}
+}
+
+std::string printFormattedTime(std::chrono::high_resolution_clock::time_point time_start, std::chrono::high_resolution_clock::time_point time_end)
+{
+	intmax_t a = std::chrono::duration_cast<std::chrono::nanoseconds>(time_end-time_start).count();
+	if(a == 0){return "CLOCK ERROR (Reported 0 Nanoseconds)";}
+	else if(a == 1){return std::to_string(a) + " Nanosecond";}
+	else if(a <= 9999){return std::to_string(a) + " Nanoseconds";}
+	else if(a <= 9999999){return std::to_string(a/1000) + " Microseconds";}
+	else if(a <= 9999999999){return std::to_string(a/1000000) + " Milliseconds";}
+	else{return std::to_string(a/1000000000) + " Seconds";}
+	return "That's a nasty error";
 }
