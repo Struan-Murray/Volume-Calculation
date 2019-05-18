@@ -8,9 +8,9 @@ void printIntro(std::string name = "NULL", intmax_t a = 0, intmax_t b = 0, intma
 {
 	std::string version = std::to_string(a);
 	intmax_t versionValues[5] = {a,b,c,d,e};
-	int_fast16_t validIntegers = 5;
+	int validIntegers = 5;
 
-	for(int16_t i = 4; i > 0; i--)
+	for(int i = 4; i > 0; i--)
 	{
 		if(versionValues[i] == 0)
 		{
@@ -22,14 +22,14 @@ void printIntro(std::string name = "NULL", intmax_t a = 0, intmax_t b = 0, intma
 		}
 	}
 
-	for(int16_t i = 1; i < validIntegers; i++)
+	for(int i = 1; i < validIntegers; i++)
 	{
 		version = version + "." + std::to_string(versionValues[i]);
 	}
 
-	std::cout << "Greetings, user." << std::endl;
-	std::cout << "Now starting \"" << name << "\", " << "Version " << version << std::endl;;
-	std::cout << std::endl;
+	std::cout << "Greetings, user.\n";
+	std::cout << "Now starting \"" << name << "\", " << "Version " << version << "\n";
+	std::cout << "\n";
 
 	return;
 }
