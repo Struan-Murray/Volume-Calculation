@@ -4,13 +4,13 @@
 #include <iostream>
 #include <string>
 
-void printIntro(std::string name = "NULL", intmax_t a = 0, intmax_t b = 0, intmax_t c = 0, intmax_t d = 0, intmax_t e = 0)
+void printIntro(std::string pName = "NULL", std::string name = "NULL", intmax_t a = 0, intmax_t b = 0, intmax_t c = 0, intmax_t d = 0, intmax_t e = 0, intmax_t f = 0)
 {
 	std::string version = std::to_string(a);
-	intmax_t versionValues[5] = {a,b,c,d,e};
-	int validIntegers = 5;
+	intmax_t versionValues[6] = {a,b,c,d,e,f};
+	int validIntegers = 6;
 
-	for(int i = 4; i > 0; i--)
+	for(int i = 5; i > 0; i--)
 	{
 		if(versionValues[i] == 0)
 		{
@@ -27,8 +27,8 @@ void printIntro(std::string name = "NULL", intmax_t a = 0, intmax_t b = 0, intma
 		version = version + "." + std::to_string(versionValues[i]);
 	}
 
-	std::cout << "Greetings, user.\n";
-	std::cout << "Now starting \"" << name << "\", " << "Version " << version << "\n";
+	std::cout << "User: " << name << ".\n";
+	std::cout << "Now starting \"" << pName << "\", " << "Version " << version << "\n";
 	std::cout << "\n";
 
 	return;

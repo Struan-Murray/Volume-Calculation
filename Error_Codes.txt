@@ -1,4 +1,4 @@
 Error Code 1: Unable to open file, try closing any open .csv files or moving them away from the .exe folder.
 Error Code 2: Radius of bottom impossibly small to reach vat diameter. Must be at least half of vat diameter.
 Error Code 3: Incompatible with Excel versions of 2003 and previous due to 65535 row limit.
-Error Code 4: Incompatible with all Excel versions from 2007 to 2019 due to limit of 1048575 rows.
+Error Code 4: Incompatible with all Excel versions from 2007 to 2019(as of 2019) due to limit of 1048575 rows.

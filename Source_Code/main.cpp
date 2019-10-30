@@ -7,31 +7,77 @@
 #include "PrintIntro.h"
 
 #define PI 3.1415926535
+#define DUNIT "mm"
+#define DUNITBASE 1000.0
+#define VUNIT "L"
+#define VUNITBASE 1000.0
 #define UNIT "mm"
 #define UNITBASE 1000.0
+#define VOLUME
 
 double cylinderSphericalCapVolume(double, double, double, double, double);
 double cylinderVolume(double, double);
 double rectangularVolume(double, double, double);
 
 void printVatOptions();
+
+int volumeProgram();
+
 std::string printFormattedTime(std::chrono::high_resolution_clock::time_point, std::chrono::high_resolution_clock::time_point);
 
-enum Vat_Shapes{BEGIN = 0, CYLINDER, CYLINDERSPHERICALCAP, RECTANGLE, SQUARE, END};
+enum Vat_Shapes{BEGIN = 0, CYLINDER, CYLINDER_SPHERICALCAP, RECTANGLE, SQUARE, END};
 
 int main()
 {
-	std::chrono::high_resolution_clock::time_point time_start = std::chrono::high_resolution_clock::now(), time_end = std::chrono::high_resolution_clock::now();
-
-	printIntro("Vat volume calculator",2018,12,12,0);
+	printIntro("Vat volume calculator","SOURCE",2019,10,30,0);
 	std::cout << "Instructions, and the latest version of this program should be available from: " << std::endl;
 	std::cout << "https://github.com/Struan-Murray/Volume-Calculation" << std::endl << std::endl;
 
-	std::string companyName{"VatCo"}, vatID{"0"}, vatTitle{"VatCo-0"}, fileName{"VatCo-0.csv"}, vatType{"Magic? Report bug please."};
+	return volumeProgram();
+}
+
+void printVatOptions()
+{
+	std::cout << "Select a vat type:" << std::endl << std::endl;
+	std::cout << "Cylinder: " << CYLINDER << std::endl;
+	std::cout << "Cylinder with Spherical Cap base: " << CYLINDER_SPHERICALCAP << std::endl;
+	std::cout << "Rectangular: " << RECTANGLE << std::endl;
+	std::cout << "Square: " << SQUARE << std::endl;
+}
+
+bool confirm()
+{
+	std::string aString{"n"};
+	getline(std::cin, aString);
+	char a = aString[0];
+
+	if(a == 'y'  || a == 'Y' || a == '1' || a == 'j' || a == 'J' || a == 'o' || a == 'O')
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int volumeProgram()
+{
+	std::chrono::high_resolution_clock::time_point time_start = std::chrono::high_resolution_clock::now(), time_end = std::chrono::high_resolution_clock::now();
+	std::string companyName{"VatCo"}, vatID{"0"}, vatTitle{"VatCo-0"}, fileName{"VatCo-0.csv"}, advC{"n"}, vatType{"Magic? Report bug please."};
 	std::ofstream vatFile;
 	int_fast16_t introLines{0};
 	double step{0.0}, depth{0.0}, width{0.0}, breadth{0.0}, side{0.0}, radius{0.0}, bottomH{0.0}, bottomV{0.0};
 
+	std::cout << "Enter Advanced Settings? ";
+	if(confirm())
+	{
+		std::cout << "\nADVANCED SETTINGS\n";
+		std::cout << "Dimensions: " << "Cur(" << DUNIT << ") m(1) dm(2) cm(3) mm(4): ";
+		std::cout << "\n";
+		std::cout << "Volume:     " << "Cur(" << VUNIT << ") m3(1) L(2) cm3(3) mm3(4): ";
+		std::cout << "\n\n";
+	}
 	std::cout << "Vat Company: ";
 	getline(std::cin, companyName); // Allows company names with spaces to be used.
 	std::cout << "Vat ID: ";
@@ -78,7 +124,7 @@ int main()
 			needDepth = true;
 			needWidth = true;
 			break;
-		case CYLINDERSPHERICALCAP:
+		case CYLINDER_SPHERICALCAP:
 			vatType = "Spherical Cap Based Vat";
 			needDepth = true;
 			needWidth = true;
@@ -108,10 +154,10 @@ int main()
 
 	if(needDepth)
 	{
-		std::cout << "Enter vat depth (mm): ";
+		std::cout << "Enter vat depth (" << UNIT << "): ";
 		std::cin >> depth;
-		depth = abs(depth)/1000.0;
-		vatFile << "Depth:," << depth*1000.0 << ",mm" << std::endl; introLines++;
+		depth = abs(depth) / UNITBASE;
+		vatFile << "Depth:," << depth * UNITBASE << "," << UNIT << std::endl; introLines++;
 	}
 
 	if(needWidth)
@@ -224,7 +270,7 @@ int main()
 		switch(vat)
 		{
 			case CYLINDER: v[i] = cylinderVolume(h, width); break;
-			case CYLINDERSPHERICALCAP: v[i] = cylinderSphericalCapVolume(h, radius, width, bottomH, bottomV); break;
+			case CYLINDER_SPHERICALCAP: v[i] = cylinderSphericalCapVolume(h, radius, width, bottomH, bottomV); break;
 			case RECTANGLE: v[i] = rectangularVolume(h, width, breadth); break;
 			case SQUARE: v[i] = rectangularVolume(h, width, width); break;
 			default: return -7;
@@ -256,15 +302,6 @@ int main()
 	return 0;
 }
 
-void printVatOptions()
-{
-	std::cout << "Select a vat type:" << std::endl << std::endl;
-	std::cout << "Cylinder: " << CYLINDER << std::endl;
-	std::cout << "Cylinder with Spherical Cap base: " << CYLINDERSPHERICALCAP << std::endl;
-	std::cout << "Rectangular: " << RECTANGLE << std::endl;
-	std::cout << "Square: " << SQUARE << std::endl;
-}
-
 double cylinderVolume( double height = 1.0, double width = 1.0)
 {
 	return PI * width * width * height / 4.0;
@@ -286,6 +323,8 @@ double cylinderSphericalCapVolume(double height = 1.0, double radius = 1.0, doub
 		return cylinderVolume(height-bottomH, width) + bottomV;
 	}
 }
+
+/* Timing Stuff */
 
 std::string printFormattedTime(std::chrono::high_resolution_clock::time_point time_start, std::chrono::high_resolution_clock::time_point time_end)
 {
