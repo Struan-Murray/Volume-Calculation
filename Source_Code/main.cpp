@@ -1,4 +1,3 @@
-#include "PrintIntro.hpp"
 #include "Confirm.hpp"
 #include "ShapeVolume.hpp"
 
@@ -29,7 +28,7 @@ enum Vat_Shapes{BEGIN = 0, CONE, CYLINDER, CYLINDER_CONE, CYLINDER_SPHERICALCAP,
 
 int main()
 {
-	printIntro("Vat Volume Calculator","SOURCE(UNRESTRICTED)",2019,10,30);
+	std::cout << "Vat Volume Calculator, User: SOURCE(UNRESTRICTED)\n";
 	std::cout << "Instructions, and the latest version of this program's source-code should be available from:\n";
 	std::cout << "https://github.com/Struan-Murray/Volume-Calculation\n\n";
 

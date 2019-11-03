@@ -1,6 +1,9 @@
 #ifndef CONFIRM_HPP
 #define CONFIRN_HPP
 
+#include <string>
+#include <iostream>
+
 bool confirm()
 {
 	std::string aString{"n"};
