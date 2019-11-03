@@ -2,7 +2,7 @@ CC:=g++
 CXXFLAGSR:= -O3  -s
 CXXFLAGSD:= -g
 CXXW:= -Wall -Weffc++ -Wextra -Wpedantic
-FILES:= main.cpp ShapeVolume.hpp Confirm.hpp PrintIntro.hpp
+FILES:= main.cpp ShapeVolume.hpp Confirm.hpp
 
 debug: $(FILES)
 	$(CC) main.cpp -o debug $(CXXW) $(CXXFLAGSD)

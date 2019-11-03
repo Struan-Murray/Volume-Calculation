@@ -51,7 +51,7 @@ double cylinder_SphericalCapVolume(double height, double width, double sphereH, 
 
 double rectangularVolume(double height, double width, double breadth, double h)//G
 {
-	return breadth * height * h;
+	return breadth * width * h;
 }
 
 double sphericalCapVolume(double height, double width, double h)//G

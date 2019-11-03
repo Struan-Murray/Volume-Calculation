@@ -54,7 +54,7 @@ int volumeProgram()
 	int_fast16_t introLines{0};
 	double step{0.0}, depth{0.0}, width{0.0}, breadth{0.0}, side{0.0}, baseH{0.0};
 
-	std::cout << "Enter Advanced Settings? ";
+	/*std::cout << "Enter Advanced Settings? ";
 	if(confirm())
 	{
 		std::cout << "\nADVANCED SETTINGS\n";
@@ -62,7 +62,7 @@ int volumeProgram()
 		std::cout << "\n";
 		std::cout << "Volume:     " << "Cur(" << VUNIT << ") m3(1) L(2) cm3(3) mm3(4): ";
 		std::cout << "\n\n";
-	}
+	}*/
 	std::cout << "Vat Company: ";
 	getline(std::cin, companyName); // Allows company names with spaces to be used.
 	std::cout << "Vat ID: ";
