@@ -44,7 +44,7 @@ double cylinder_ConeVolume(double height, double width, double coneH, double h)
 	}
 	else
 	{
-		return cylinderVolume(height - coneH, width, h - coneH) + coneVolume(coneH, width, h);
+		return cylinderVolume(height - coneH, width, h - coneH) + coneVolume(coneH, width, coneH);
 	}
 }
 
