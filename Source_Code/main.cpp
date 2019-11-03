@@ -1,23 +1,23 @@
+#include "PrintIntro.hpp"
+#include "Confirm.hpp"
+#include "ShapeVolume.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
 #include <chrono>
 #include <string>
-
-#include "PrintIntro.h"
+#include <iomanip> // For Setprecision
 
 #define PI 3.1415926535
 #define DUNIT "mm"
 #define DUNITBASE 1000.0
 #define VUNIT "L"
 #define VUNITBASE 1000.0
+#define RESTRICTED 0
 #define UNIT "mm"
 #define UNITBASE 1000.0
 #define VOLUME
-
-double cylinderSphericalCapVolume(double, double, double, double, double);
-double cylinderVolume(double, double);
-double rectangularVolume(double, double, double);
 
 void printVatOptions();
 
@@ -25,13 +25,13 @@ int volumeProgram();
 
 std::string printFormattedTime(std::chrono::high_resolution_clock::time_point, std::chrono::high_resolution_clock::time_point);
 
-enum Vat_Shapes{BEGIN = 0, CYLINDER, CYLINDER_SPHERICALCAP, RECTANGLE, SQUARE, END};
+enum Vat_Shapes{BEGIN = 0, CYLINDER, CYLINDER_SPHERICALCAP, CUBOID, CUBE, END};
 
 int main()
 {
-	printIntro("Vat volume calculator","SOURCE",2019,10,30,0);
-	std::cout << "Instructions, and the latest version of this program should be available from: " << std::endl;
-	std::cout << "https://github.com/Struan-Murray/Volume-Calculation" << std::endl << std::endl;
+	printIntro("Vat Volume Calculator","SOURCE(UNRESTRICTED)",2019,10,30);
+	std::cout << "Instructions, and the latest version of this program's source-code should be available from:\n";
+	std::cout << "https://github.com/Struan-Murray/Volume-Calculation\n\n";
 
 	return volumeProgram();
 }
@@ -41,24 +41,8 @@ void printVatOptions()
 	std::cout << "Select a vat type:" << std::endl << std::endl;
 	std::cout << "Cylinder: " << CYLINDER << std::endl;
 	std::cout << "Cylinder with Spherical Cap base: " << CYLINDER_SPHERICALCAP << std::endl;
-	std::cout << "Rectangular: " << RECTANGLE << std::endl;
-	std::cout << "Square: " << SQUARE << std::endl;
-}
-
-bool confirm()
-{
-	std::string aString{"n"};
-	getline(std::cin, aString);
-	char a = aString[0];
-
-	if(a == 'y'  || a == 'Y' || a == '1' || a == 'j' || a == 'J' || a == 'o' || a == 'O')
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+	std::cout << "Cuboid: " << CUBOID << std::endl;
+	std::cout << "Cube: " << CUBE << std::endl;
 }
 
 int volumeProgram()
@@ -67,7 +51,7 @@ int volumeProgram()
 	std::string companyName{"VatCo"}, vatID{"0"}, vatTitle{"VatCo-0"}, fileName{"VatCo-0.csv"}, advC{"n"}, vatType{"Magic? Report bug please."};
 	std::ofstream vatFile;
 	int_fast16_t introLines{0};
-	double step{0.0}, depth{0.0}, width{0.0}, breadth{0.0}, side{0.0}, radius{0.0}, bottomH{0.0}, bottomV{0.0};
+	double step{0.0}, depth{0.0}, width{0.0}, breadth{0.0}, side{0.0}, baseH{0.0};
 
 	std::cout << "Enter Advanced Settings? ";
 	if(confirm())
@@ -114,8 +98,7 @@ int volumeProgram()
 
 	vatFile << "Type:,";
 
-	bool needDepth{false}, needWidth{false}, needBreadth{false}, needSide{false}, needRadius{false}, needBottomHV{false};
-	bool checkRadius{false};
+	bool needDepth{false}, needWidth{false}, needBreadth{false}, needSide{false}, needBaseH{false};
 
 	switch(vat)
 	{
@@ -128,18 +111,16 @@ int volumeProgram()
 			vatType = "Spherical Cap Based Vat";
 			needDepth = true;
 			needWidth = true;
-			needRadius = true;
-			checkRadius = true;
-			needBottomHV = true;
+			needBaseH = true;
 			break;
-		case RECTANGLE:
-			vatType = "Flat Based Rectangle";
+		case CUBOID:
+			vatType = "Flat Based Cuboid";
 			needDepth = true;
 			needWidth = true;
 			needBreadth = true;
 			break;
-		case SQUARE:
-			vatType = "Flat Based Rectangle";
+		case CUBE:
+			vatType = "Flat Based Cube";
 			needDepth = true;
 			needWidth = true;
 			break;
@@ -184,20 +165,12 @@ int volumeProgram()
 		vatFile << "Breadth:," << side*1000.0 << ",mm" << std::endl; introLines++;
 	}
 
-	if(needRadius)
+	if(needBaseH)
 	{
-		std::cout << "Enter vat bottom radius (mm): ";
-		std::cin >> radius;
-		radius = abs(radius)/1000.0;
-		vatFile << "Bottom Radius:," << radius*1000.0 << ",mm" << std::endl; introLines++;
-	}
-
-	if(needBottomHV)
-	{
-		bottomH = radius-sqrt(radius*radius-((width/2)*(width/2)));
-		bottomV = (PI * bottomH * bottomH / 3) * (3 * radius - bottomH);
-		vatFile << "Base Height:," << bottomH*1000.0 << ",mm" << std::endl; introLines++;
-		vatFile << "Base Volume:," << bottomV*1000.0 << ",L" << std::endl; introLines++;
+		std::cout << "Enter vat base height (mm): ";
+		std::cin >> baseH;
+		baseH = abs(baseH)/1000.0;
+		vatFile << "Base Height:," << baseH*1000.0 << ",mm" << std::endl; introLines++;
 	}
 
 	std::cout << "Enter calculation step (mm): ";
@@ -212,16 +185,7 @@ int volumeProgram()
 	intmax_t numberOfLines = numberOfValues + introLines;
 	std::cout << "Values: " << numberOfValues << std::endl;
 
-	if(checkRadius)
-	{
-		if(width > 2*radius)
-		{
-			std::cout << "IMPOSSIBLE RADIUS\n";
-			return -2;
-		}
-	}
-
-	else if(numberOfLines > 1048576)
+	if(numberOfLines > 1048576)
 	{
 		std::cout << "Program will output " << numberOfLines <<
 		" rows.\nThis will be incompatible with ALL Excel versions.\nDo you wish to continue? (Y/N) ";
@@ -269,10 +233,10 @@ int volumeProgram()
 	{
 		switch(vat)
 		{
-			case CYLINDER: v[i] = cylinderVolume(h, width); break;
-			case CYLINDER_SPHERICALCAP: v[i] = cylinderSphericalCapVolume(h, radius, width, bottomH, bottomV); break;
-			case RECTANGLE: v[i] = rectangularVolume(h, width, breadth); break;
-			case SQUARE: v[i] = rectangularVolume(h, width, width); break;
+			case CYLINDER: v[i] = cylinderVolume(depth, width, h); break;
+			case CYLINDER_SPHERICALCAP: v[i] = cylinder_SphericalCapVolume(depth, width, baseH, h); break;
+			case CUBOID: v[i] = rectangularVolume(depth, width, breadth, h); break;
+			case CUBE: v[i] = rectangularVolume(depth, width, width, h); break;
 			default: return -7;
 		}
 	}
@@ -286,8 +250,11 @@ int volumeProgram()
 
 	for(h = 0.0, i = 0; i < numberOfValues; h+= step, i++)
 	{
-		vatFile << h*1000.0 << "," << v[i]*1000.0 << "\n";
+		vatFile << std::scientific << std::setprecision(3) << h*1000.0 << ",";
+		vatFile << std::fixed << std::setprecision(3) << v[i]*1000.0 << "\n";
 	}
+
+	std::cout << std::scientific << std::setprecision(9);
 
 	time_end = std::chrono::high_resolution_clock::now();
 
@@ -300,28 +267,6 @@ int volumeProgram()
 	std::cout << "Complete with " << numberOfLines << " lines." << std::endl;
 
 	return 0;
-}
-
-double cylinderVolume( double height = 1.0, double width = 1.0)
-{
-	return PI * width * width * height / 4.0;
-}
-
-double rectangularVolume(double height = 1.0, double width = 1.0, double breadth = 1.0)
-{
-	return width * breadth * height;
-}
-
-double cylinderSphericalCapVolume(double height = 1.0, double radius = 1.0, double width = 1.0, double bottomH = 0.0/0.0, double bottomV = 0.0/0.0)
-{
-	if(height < bottomH)
-	{
-		return ((PI*height*height)/3) * (3*radius-height);
-	}
-	else
-	{
-		return cylinderVolume(height-bottomH, width) + bottomV;
-	}
 }
 
 /* Timing Stuff */
