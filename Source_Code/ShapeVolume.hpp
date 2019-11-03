@@ -6,8 +6,8 @@
 double coneVolume(double height, double width, double h);
 
 double cylinderVolume(double height, double width, double h);
-double cylinder_SphericalCapVolume(double height, double width, double sphereH, double h);
 double cylinder_ConeVolume(double height, double width, double coneH, double h);
+double cylinder_SphericalCapVolume(double height, double width, double sphereH, double h);
 
 double rectangularVolume(double height, double width, double breadth, double h);
 
@@ -21,20 +21,9 @@ double coneVolume(double height, double width, double h)
 }
 
 
-double cylinderVolume(double height, double width, double h)//G
+double cylinderVolume(double height, double width, double h) // G
 {
 	return PI * width * width * h / 4.0;
-}
-double cylinder_SphericalCapVolume(double height, double width, double sphereH, double h)//G
-{
-	if(h < sphereH)
-	{
-		return sphericalCapVolume(sphereH, width, h);
-	}
-	else
-	{
-		return cylinderVolume(height - sphereH, width, h - sphereH) + sphericalCapVolume(sphereH, width, sphereH);
-	}
 }
 double cylinder_ConeVolume(double height, double width, double coneH, double h)
 {
@@ -47,6 +36,18 @@ double cylinder_ConeVolume(double height, double width, double coneH, double h)
 		return cylinderVolume(height - coneH, width, h - coneH) + coneVolume(coneH, width, coneH);
 	}
 }
+double cylinder_SphericalCapVolume(double height, double width, double sphereH, double h)//G
+{
+	if(h < sphereH)
+	{
+		return sphericalCapVolume(sphereH, width, h);
+	}
+	else
+	{
+		return cylinderVolume(height - sphereH, width, h - sphereH) + sphericalCapVolume(sphereH, width, sphereH);
+	}
+}
+
 
 double rectangularVolume(double height, double width, double breadth, double h)//G
 {
