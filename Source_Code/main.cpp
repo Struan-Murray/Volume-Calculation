@@ -25,7 +25,7 @@ int volumeProgram();
 
 std::string printFormattedTime(std::chrono::high_resolution_clock::time_point, std::chrono::high_resolution_clock::time_point);
 
-enum Vat_Shapes{BEGIN = 0, CYLINDER, CYLINDER_SPHERICALCAP, CUBOID, CUBE, END};
+enum Vat_Shapes{BEGIN = 0, CONE, CYLINDER, CYLINDER_SPHERICALCAP, CUBOID, CUBE, END};
 
 int main()
 {
@@ -39,10 +39,11 @@ int main()
 void printVatOptions()
 {
 	std::cout << "Select a vat type:" << std::endl << std::endl;
-	std::cout << "Cylinder: " << CYLINDER << std::endl;
+	std::cout << "Cone: " << CONE << std::endl;
+	std::cout << "Cylinder with Flat Base: " << CYLINDER << std::endl;
 	std::cout << "Cylinder with Spherical Cap base: " << CYLINDER_SPHERICALCAP << std::endl;
-	std::cout << "Cuboid: " << CUBOID << std::endl;
-	std::cout << "Cube: " << CUBE << std::endl;
+	std::cout << "Cuboid with Flat Base: " << CUBOID << std::endl;
+	std::cout << "Cube with Flat Base: " << CUBE << std::endl;
 }
 
 int volumeProgram()
@@ -102,25 +103,30 @@ int volumeProgram()
 
 	switch(vat)
 	{
+		case CONE:
+			vatType = "Cone";
+			needDepth = true;
+			needWidth = true;
+			break;
 		case CYLINDER:
-			vatType = "Flat Based Cylinder";
+			vatType = "Flat-Based Cylinder";
 			needDepth = true;
 			needWidth = true;
 			break;
 		case CYLINDER_SPHERICALCAP:
-			vatType = "Spherical Cap Based Vat";
+			vatType = "Spherical-Cap-Based Cylinder";
 			needDepth = true;
 			needWidth = true;
 			needBaseH = true;
 			break;
 		case CUBOID:
-			vatType = "Flat Based Cuboid";
+			vatType = "Flat-Based Cuboid";
 			needDepth = true;
 			needWidth = true;
 			needBreadth = true;
 			break;
 		case CUBE:
-			vatType = "Flat Based Cube";
+			vatType = "Flat-Based Cube";
 			needDepth = true;
 			needWidth = true;
 			break;
@@ -233,6 +239,7 @@ int volumeProgram()
 	{
 		switch(vat)
 		{
+			case CONE: v[i] = coneVolume(depth, width, h); break;
 			case CYLINDER: v[i] = cylinderVolume(depth, width, h); break;
 			case CYLINDER_SPHERICALCAP: v[i] = cylinder_SphericalCapVolume(depth, width, baseH, h); break;
 			case CUBOID: v[i] = rectangularVolume(depth, width, breadth, h); break;
