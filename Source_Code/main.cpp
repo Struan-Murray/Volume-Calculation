@@ -1,298 +1,197 @@
-#include "Confirm.hpp"
-#include "ShapeVolume.hpp"
+#include "files.hpp"
+#include "confirm.hpp"
+#include "shapes.hpp"
+#include "time.hpp"
 
-#include <iostream>
-#include <fstream>
-#include <cmath>
 #include <chrono>
-#include <string>
-#include <iomanip> // For Setprecision
+#include <filesystem>
+#include <fstream>
 
-#define PI 3.1415926535
-#define DUNIT "mm"
-#define DUNITBASE 1000.0
-#define VUNIT "L"
-#define VUNITBASE 1000.0
-#define RESTRICTED 0
-#define UNIT "mm"
-#define UNITBASE 1000.0
-#define VOLUME
+#define USER "SOURCE"
+#define ACCESS "DEV"
+#define VERSION "2020-06-06"
 
-void printVatOptions();
 
-int volumeProgram();
-
-std::string printFormattedTime(std::chrono::high_resolution_clock::time_point, std::chrono::high_resolution_clock::time_point);
-
-enum Vat_Shapes{BEGIN = 0, CONE, CYLINDER, CYLINDER_CONE, CYLINDER_SPHERICALCAP, CUBOID, CUBE, END};
 
 int main()
 {
-	std::cout << "Vat Volume Calculator, User: SOURCE(UNRESTRICTED)\n";
-	std::cout << "Instructions, and the latest version of this program's source-code should be available from:\n";
-	std::cout << "https://github.com/Struan-Murray/Volume-Calculation\n\n";
+	//std::string version = VERSION;
+	std::string compiled = __TIMESTAMP__;
+	std::string compiler = __VERSION__;
+	std::string version = compiled + "(" + compiler + ")";
+	std::cout << "Version: " << version << "\n";
+	
+	// Main variables
+	int ret = 0;
 
-	return volumeProgram();
-}
+	// Startup
+	std::cout << "---STARTUP\n";
 
-void printVatOptions()
-{
-	std::cout << "Select a vat type:" << std::endl << std::endl;
-	std::cout << "Cone: " << CONE << std::endl;
-	std::cout << "Cylinder with Flat Base: " << CYLINDER << std::endl;
-	std::cout << "Cylinder with Cone Base: " << CYLINDER_CONE << std::endl;
-	std::cout << "Cylinder with Spherical Cap base: " << CYLINDER_SPHERICALCAP << std::endl;
-	std::cout << "Cuboid with Flat Base: " << CUBOID << std::endl;
-	std::cout << "Cube with Flat Base: " << CUBE << std::endl;
-}
+	ret = files_setup();
+	if(ret != 0){return ret;}
+	
+	std::fstream logfile;
+	
+	std::string logname = "log.txt";
+	std::string logpath = get_log_path() + "/" + logname;
+	
+	if(!std::filesystem::exists(logpath)){
+		std::cout << "Creating new log file...\n";
+		logfile.open(logpath, std::ios::out|std::ios::trunc);
 
-int volumeProgram()
-{
-	std::chrono::high_resolution_clock::time_point time_start = std::chrono::high_resolution_clock::now(), time_end = std::chrono::high_resolution_clock::now();
-	std::string companyName{"VatCo"}, vatID{"0"}, vatTitle{"VatCo-0"}, fileName{"VatCo-0.csv"}, advC{"n"}, vatType{"Magic? Report bug please."};
-	std::ofstream vatFile;
-	int_fast16_t introLines{0};
-	double step{0.0}, depth{0.0}, width{0.0}, breadth{0.0}, side{0.0}, baseH{0.0};
-
-	/*std::cout << "Enter Advanced Settings? ";
-	if(confirm())
-	{
-		std::cout << "\nADVANCED SETTINGS\n";
-		std::cout << "Dimensions: " << "Cur(" << DUNIT << ") m(1) dm(2) cm(3) mm(4): ";
-		std::cout << "\n";
-		std::cout << "Volume:     " << "Cur(" << VUNIT << ") m3(1) L(2) cm3(3) mm3(4): ";
-		std::cout << "\n\n";
-	}*/
-	std::cout << "Vat Company: ";
-	getline(std::cin, companyName); // Allows company names with spaces to be used.
-	std::cout << "Vat ID: ";
-	getline(std::cin, vatID); // Allows vat ID's with spaces to be used.
-
-	vatTitle = companyName + "-" + vatID; // Title of vat to be processed.
-	fileName = vatTitle + ".csv"; // Name of file.
-
-	vatFile.open(fileName, std::ios::trunc); // Open file and truncate contents (erases previous content).
-
-	if(vatFile.is_open())
-	{
-		vatFile << "Vat:," << vatTitle; introLines++;
-		vatFile << std::endl; introLines++;
-		vatFile << std::endl; introLines++;
-
-		std::cout << fileName << " succesfully created and open.\n" << std::endl;
+		if(!std::filesystem::exists(logpath)){
+			std::cout << "ERROR -107: Log file not created.\n";
+			return -107;
+		}
 	}
-	else
-	{
-		std::cout << "STRUAN: UNABLE TO OPEN FILE. Is the file locked by the OS? (Open) Does it have an illegal character? (?,\\,\" etc)\n";
-		perror("OS");
-		return -1;
+	else{
+		std::cout << "Logfile...OK\n";
+		logfile.open(logpath, std::ios::out|std::ios::app);
 	}
+	
+	if(!logfile.is_open()){
+		std::cout << "ERROR -108: Log file not opened.\n";
+		return -108;
+	}
+	
+	logfile << slowtime();
 
-	int vat; // For selecting vat type.
-	char ignoreError[20]; // Used to store values for user input re incompatibilities.
+	std::cout << "---STARTUP CHECKS COMPLETE\n\n";
 
-	printVatOptions();
-	std::cout << std::endl;
+	// Intro
 
-	std::cout << "Vat type: ";
-	std::cin >> vat;
+	std::string user = USER;
+	std::string access = ACCESS;
 
-	vatFile << "Type:,";
+	//std::cout << "\x1B[2J\x1B[H";
+	//std::cout << "\n\n\n\n\n";
+	std::cout << "----- Vat Volume Calculator -----\n";
+	std::cout << "User: " + user + "\n";
+	std::cout << "Access: " + access + "\n\n";
+	
+	logfile << "|Version:" << version << "|User:" << user << "|Access:" << access; // LOGFILE
 
-	bool needDepth{false}, needWidth{false}, needBreadth{false}, needSide{false}, needBaseH{false};
+	// IO Settings
 
-	switch(vat)
-	{
-		case CONE:
-			vatType = "Cone";
-			needDepth = true;
-			needWidth = true;
+	int type = 0;
+	double input = 1;
+	std::string inputM = "m";
+
+	std::cout << "Input Type\n";
+	std::cout << "Metres      - 1\n";
+	std::cout << "Millimetres - 2\n";
+	std::cout << "Feet        - 3\n";
+	std::cout << "\nSelection: ";
+	std::cin >> type;
+	std::cout << "\n";
+
+	switch(type){
+		case 1:
+			input = 1;
+			inputM = "m";
 			break;
-		case CYLINDER:
-			vatType = "Flat-Based Cylinder";
-			needDepth = true;
-			needWidth = true;
+		case 2:
+			input = 0.001;
+			inputM = "mm";
 			break;
-		case CYLINDER_CONE:
-			vatType = "Cone-Based Cylinder";
-			needDepth = true;
-			needWidth = true;
-			needBaseH = true;
+		case 3:
+			input = 0.3048;
+			inputM = "ft";
 			break;
-		case CYLINDER_SPHERICALCAP:
-			vatType = "Spherical-Cap-Based Cylinder";
-			needDepth = true;
-			needWidth = true;
-			needBaseH = true;
-			break;
-		case CUBOID:
-			vatType = "Flat-Based Cuboid";
-			needDepth = true;
-			needWidth = true;
-			needBreadth = true;
-			break;
-		case CUBE:
-			vatType = "Flat-Based Cube";
-			needDepth = true;
-			needWidth = true;
-			break;
+
+		// Default Input Case
 		default:
-			std::cout << "Incompatible type";
-			return -5;
+			input = 1;
+			inputM = "m";
+	}
+	
+	logfile << "|Input:" << input << "(" << inputM << ")"; // LOGFILE
+
+	double output = 0;
+	std::string outputM = "";
+
+	std::cout << "Output Type\n";
+	std::cout << "Metres Cubed - 1\n";
+	std::cout << "Litres       - 2\n";
+	std::cout << "Feet Cubed   - 3\n";
+	std::cout << "\nSelection: ";
+	std::cin >> type;
+	std::cout << "\n";
+
+	switch(type){
+		case 1:
+			output = 1;
+			outputM = "m^3";
+			break;
+		case 2:
+			output = 1000;
+			outputM = "L";
+			break;
+		case 3:
+			output = 35.3146667;
+			outputM = "ft^3";
+			break;
+
+		// Default Output Case
+		default:
+			output = 1;
+			outputM = "m^3";
+	}
+	
+	logfile << "|Output:" << output << "(" << outputM << ")"; // LOGFILE
+
+
+	std::string vat_company{"NULL"}, vat_id{"NULL"};
+
+	std::cout << "Vat Company:";
+	std::cin.ignore(100,'\n');
+	std::getline(std::cin,vat_company);
+	std::cout << "Vat ID     :";
+	std::getline(std::cin,vat_id);
+
+	logfile << "|Company:" << vat_company << "|ID:" << vat_id; // LOGFILE
+
+	std::string filename = vat_company + "-" + vat_id + ".csv";
+	std::string filepath = get_vat_path() + "/" + filename;
+
+	logfile << "|Filepath:" << filepath;
+
+	// Main Sequence
+
+	std::fstream vatfile;
+
+	vatfile.open(filepath, std::ios::out|std::ios::in|std::ios::trunc);
+
+	if(!std::filesystem::exists(filepath)){
+		std::cout << "ERROR -109: Vat file not created.\n";
+		return -109;
+	}
+	if(!vatfile.is_open()){
+		std::cout << "ERROR -110: Vat file not opened.\n";
+		return -110;
 	}
 
-	vatFile << vatType << std::endl; introLines++;
-	vatFile << std::endl; introLines++;
-	vatFile << "Description,Value,Unit" << std::endl; introLines++;
-
-	if(needDepth)
-	{
-		std::cout << "Enter vat depth (" << UNIT << "): ";
-		std::cin >> depth;
-		depth = abs(depth) / UNITBASE;
-		vatFile << "Depth:," << depth * UNITBASE << "," << UNIT << std::endl; introLines++;
-	}
-
-	if(needWidth)
-	{
-		std::cout << "Enter vat width (mm): ";
-		std::cin >> width;
-		width = abs(width)/1000.0;
-		vatFile << "Width:," << width*1000.0 << ",mm" << std::endl; introLines++;
-	}
-
-	if(needBreadth)
-	{
-		std::cout << "Enter vat breadth (mm): ";
-		std::cin >> breadth;
-		breadth = abs(breadth)/1000.0;
-		vatFile << "Breadth:," << breadth*1000.0 << ",mm" << std::endl; introLines++;
-	}
-
-	if(needSide)
-	{
-		std::cout << "Enter vat side (mm): ";
-		std::cin >> side;
-		side = abs(side)/1000.0;
-		vatFile << "Breadth:," << side*1000.0 << ",mm" << std::endl; introLines++;
-	}
-
-	if(needBaseH)
-	{
-		std::cout << "Enter vat base height (mm): ";
-		std::cin >> baseH;
-		baseH = abs(baseH)/1000.0;
-		vatFile << "Base Height:," << baseH*1000.0 << ",mm" << std::endl; introLines++;
-	}
-
-	std::cout << "Enter calculation step (mm): ";
-	std::cin >> step;
-
-	step = step/1000.0;
-
-	vatFile << "Step:," << step*1000.0 << ",mm" << std::endl; introLines++;
-	vatFile << std::endl << "Fill Level (mm),Total Volume (L)" << std::endl; introLines++;
-
-	intmax_t numberOfValues = (intmax_t)(depth / step + 1.0 + 0.1);
-	intmax_t numberOfLines = numberOfValues + introLines;
-	std::cout << "Values: " << numberOfValues << std::endl;
-
-	if(numberOfLines > 1048576)
-	{
-		std::cout << "Program will output " << numberOfLines <<
-		" rows.\nThis will be incompatible with ALL Excel versions.\nDo you wish to continue? (Y/N) ";
-
-		std::cin >> ignoreError;
-
-		if(ignoreError[0] != 'Y' && ignoreError[0] != 'y' && ignoreError[0] != '1')
-		{
-			std::cout << "Incompatible with ALL Excel versions.";
-			return -4;
-		}
-		else{}
-	}
-	else if(numberOfLines > 65536)
-	{
-		std::cout << "Program will output " << numberOfLines <<
-		" rows.\nThis will be incompatible with Excel verions before and including 2003.\nDo you wish to continue? (Y/N) ";
-
-		std::cin >> ignoreError;
-
-		if(ignoreError[0] != 'Y' && ignoreError[0] != 'y' && ignoreError[0] != '1')
-		{
-			std::cout << "Excel Version too old.";
-			return -3;
-		}
-		else{}
-	}
-	else{}
-
-	double* v = NULL;
-	v = new (std::nothrow) double[numberOfValues]; // Assign potentially large amount of memory to heap.
-	if(v == NULL)
-	{
-		std::cout << "Array not created\n";
-		return -8;
-	}
-	else{}
-
-	double h = 0.0;
-	intmax_t i = 0;
-
-	time_start = std::chrono::high_resolution_clock::now();
-
-	for(h = 0.0, i = 0; i < numberOfValues; h+= step, i++)
-	{
-		switch(vat)
-		{
-			case CONE: v[i] = coneVolume(depth, width, h); break;
-			case CYLINDER: v[i] = cylinderVolume(depth, width, h); break;
-			case CYLINDER_CONE: v[i] = cylinder_ConeVolume(depth, width, baseH, h); break;
-			case CYLINDER_SPHERICALCAP: v[i] = cylinder_SphericalCapVolume(depth, width, baseH, h); break;
-			case CUBOID: v[i] = rectangularVolume(depth, width, breadth, h); break;
-			case CUBE: v[i] = rectangularVolume(depth, width, width, h); break;
-			default: return -7;
-		}
-	}
-
-	time_end = std::chrono::high_resolution_clock::now();
+	double volume = 0.0;
+	double step = 1.0;
 
 	std::cout << "\n";
-	std::cout << "Calculations complete in " << printFormattedTime(time_start, time_end) << std::endl;
+	std::cout << "Vat Options\n";
+	shape_options();
+	std::cout << "\n";
 
-	time_start = std::chrono::high_resolution_clock::now();
+	std::cout << "Writing data to: " << filepath << "\n";
 
-	for(h = 0.0, i = 0; i < numberOfValues; h+= step, i++)
-	{
-		vatFile << std::scientific << std::setprecision(3) << h*1000.0 << ",";
-		vatFile << std::fixed << std::setprecision(3) << v[i]*1000.0 << "\n";
-	}
+	volume = input*input*input*output*cylinder_horizontal(10,3,1.4);
+	std::cout << "Volume: " << volume << " " << outputM << "\n";
 
-	std::cout << std::scientific << std::setprecision(9);
+	// Close All	
 
-	time_end = std::chrono::high_resolution_clock::now();
-
-	std::cout << "File writing complete in "<< printFormattedTime(time_start, time_end) << std::endl;
-
-	delete[] v;
-
-	vatFile.close();
-
-	std::cout << "Complete with " << numberOfLines << " lines." << std::endl;
+	logfile << "\n";
+	logfile.close();
+	vatfile.close();
 
 	return 0;
 }
 
-/* Timing Stuff */
 
-std::string printFormattedTime(std::chrono::high_resolution_clock::time_point time_start, std::chrono::high_resolution_clock::time_point time_end)
-{
-	intmax_t a = std::chrono::duration_cast<std::chrono::nanoseconds>(time_end-time_start).count();
-	if(a == 0){return "CLOCK ERROR (Reported 0 Nanoseconds)";}
-	else if(a == 1){return std::to_string(a) + " Nanosecond";}
-	else if(a <= 9999){return std::to_string(a) + " Nanoseconds";}
-	else if(a <= 9999999){return std::to_string(a/1000) + " Microseconds";}
-	else if(a <= 9999999999){return std::to_string(a/1000000) + " Milliseconds";}
-	else{return std::to_string(a/1000000000) + " Seconds";}
-	return "That's a nasty error";
-}
+

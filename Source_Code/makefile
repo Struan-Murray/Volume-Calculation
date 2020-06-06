@@ -1,16 +1,21 @@
 CC:=g++
-CXXFLAGSR:= -O3  -s
-CXXFLAGSD:= -g
-CXXW:= -Wall -Weffc++ -Wextra -Wpedantic
-FILES:= main.cpp ShapeVolume.hpp Confirm.hpp
+CXXREQUIREMENTS:= -std=c++17
+CXXFLAGSDEBUG:= -Og -g
+CXXFLAGSFULL:= -O3  -s
+CXXWARNINGS:= -Wall -Weffc++ -Wextra -Wpedantic
+INPUT:= main.cpp
+TITLE:= 'Vat Volume Calculations'
+FILES:= files.cpp #confirm.cpp main.cpp ShapeVolume.hpp
 
-debug: $(FILES)
-	$(CC) main.cpp -o debug $(CXXW) $(CXXFLAGSD)
+debug: $(INPUT) $(FILES)
+	$(CC) $(INPUT) $(FILES) -o debug $(CXXREQUIREMENTS) $(CXXFLAGSDEBUG) $(CXXWARNINGS)
 
-main:: $(FILES)
-	$(CC) main.cpp -o main $(CXXFLAGSR) 
+full: $(INPUT) $(FILES)
+	$(CC) $(INPUT) $(FILES) -o full $(CXXREQUIREMENTS) $(CXXFLAGSFULL)
+	mv full $(TITLE)
 
-all: main debug
+all: full debug
 
 clean:
-	rm main debug *.csv
+	rm full debug vats/*.csv $(TITLE) || true
+	rm -r vats logs
