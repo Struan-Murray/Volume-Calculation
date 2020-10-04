@@ -11,8 +11,6 @@
 #define ACCESS "DEV"
 #define VERSION "2020-06-06"
 
-
-
 int main()
 {
 	//std::string version = VERSION;
@@ -20,7 +18,7 @@ int main()
 	std::string compiler = __VERSION__;
 	std::string version = compiled + "(" + compiler + ")";
 	std::cout << "Version: " << version << "\n";
-	
+
 	// Main variables
 	int ret = 0;
 
@@ -29,12 +27,12 @@ int main()
 
 	ret = files_setup();
 	if(ret != 0){return ret;}
-	
+
 	std::fstream logfile;
-	
+
 	std::string logname = "log.txt";
 	std::string logpath = get_log_path() + "/" + logname;
-	
+
 	if(!std::filesystem::exists(logpath)){
 		std::cout << "Creating new log file...\n";
 		logfile.open(logpath, std::ios::out|std::ios::trunc);
@@ -48,12 +46,12 @@ int main()
 		std::cout << "Logfile...OK\n";
 		logfile.open(logpath, std::ios::out|std::ios::app);
 	}
-	
+
 	if(!logfile.is_open()){
 		std::cout << "ERROR -108: Log file not opened.\n";
 		return -108;
 	}
-	
+
 	logfile << slowtime();
 
 	std::cout << "---STARTUP CHECKS COMPLETE\n\n";
@@ -68,7 +66,7 @@ int main()
 	std::cout << "----- Vat Volume Calculator -----\n";
 	std::cout << "User: " + user + "\n";
 	std::cout << "Access: " + access + "\n\n";
-	
+
 	logfile << "|Version:" << version << "|User:" << user << "|Access:" << access; // LOGFILE
 
 	// IO Settings
@@ -104,7 +102,7 @@ int main()
 			input = 1;
 			inputM = "m";
 	}
-	
+
 	logfile << "|Input:" << input << "(" << inputM << ")"; // LOGFILE
 
 	double output = 0;
@@ -137,7 +135,7 @@ int main()
 			output = 1;
 			outputM = "m^3";
 	}
-	
+
 	logfile << "|Output:" << output << "(" << outputM << ")"; // LOGFILE
 
 
@@ -184,7 +182,7 @@ int main()
 	volume = input*input*input*output*cylinder_horizontal(10,3,1.4);
 	std::cout << "Volume: " << volume << " " << outputM << "\n";
 
-	// Close All	
+	// Close All
 
 	logfile << "\n";
 	logfile.close();
