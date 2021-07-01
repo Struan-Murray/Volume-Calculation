@@ -17,7 +17,7 @@ int files_setup()
 		std::filesystem::create_directories(LPATH);
 
 		if(!std::filesystem::exists(LPATH)){
-			std::cout << "ERROR -101: \"logs\" Directory not created.\n";
+			std::cerr << "ERROR -101: \"logs\" Directory not created.\n";
 			return -101;
 		}
 	}
@@ -31,10 +31,11 @@ int files_setup()
 
 	if(!std::filesystem::exists(LRPATH)){
 		std::cout << "Creating new \"logs\" README.\n";
+
 		lreadme.open(LRPATH, std::ios::out);
 
 		if(!std::filesystem::exists(LRPATH)){
-			std::cout << "ERROR -102: \"logs\" README not created.\n";
+			std::cerr << "ERROR -102: \"logs\" README not created.\n";
 			return -102;
 		}
 		lreadme.close();
@@ -46,6 +47,7 @@ int files_setup()
 	// Modify "logs" README file if it doesn't match current info ERR-103
 
 	lreadme.open(LRPATH, std::ios::in);
+	// Log revision date, if the existing log has a different date, overwrites it.
 	std::string lreadmeintro = "LRv2020.06.04.14";
 
 	std::string lreadmeline;
@@ -67,7 +69,7 @@ int files_setup()
 		std::getline(lreadme, lreadmeline);
 
 		if(lreadmeline != lreadmeintro){
-			std::cout << "ERROR -103: \"logs\" README not written.\n";
+			std::cerr << "ERROR -103: \"logs\" README not written.\n";
 			return -103;
 		}
 		lreadme.close();
@@ -84,7 +86,7 @@ int files_setup()
 		std::filesystem::create_directories(VPATH);
 
 		if(!std::filesystem::exists(VPATH)){
-			std::cout << "ERROR -104: \"vats\" Directory not created.\n";
+			std::cerr << "ERROR -104: \"vats\" Directory not created.\n";
 			return -104;
 		}
 	}
@@ -113,6 +115,7 @@ int files_setup()
 	// Modify "vats" README file if it doesn't match current info ERR-106
 
 	vreadme.open(VRPATH, std::ios::in);
+	// Output file revision date, if the existing log has a different date, overwrites it.
 	std::string vreadmeintro = "VRv2020.06.04.15";
 
 	std::string vreadmeline;

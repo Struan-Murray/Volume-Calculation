@@ -23,7 +23,7 @@ int volumeProgram();
 std::string printFormattedTime(std::chrono::high_resolution_clock::time_point, std::chrono::high_resolution_clock::time_point);
 
 enum Vat_Shapes{FLAT = 0        , CONE         , SPHERICALCAP         , TRUNCATEDCONE         , TRUNCATEDSPHERICALCAP         ,
-                CYLINDER = 10   , CYLINDER_CONE, CYLINDER_SPHERICALCAP, CYLINDER_TRUNCATEDCONE, CYLINDER_TRUNCATEDSPHERICALCAP,
+                CYLINDER = 10   , CYLINDER_CONE, CYLINDER_SPHERICALCAP, CYLINDER_TRUNCATEDCONE, CYLINDER_TRUNCATEDSPHERICALCAP, CYLINDER_HOR,
                 RECTANGULAR = 20,
                 END};
 
@@ -43,10 +43,11 @@ void printVatOptions()
 	//std::cout << "Spherical Cap: "                              << SPHERICALCAP                   << "\n";
 	//std::cout << "Truncated Cone: "                             << TRUNCATEDCONE                  << "\n";
 	//std::cout << "Truncated Spherical Cap: "                    << TRUNCATEDSPHERICALCAP          << "\n";
-	std::cout << "Cylinder with flat base: "                    << CYLINDER                       << "\n";
-	std::cout << "Cylinder with cone base: "                    << CYLINDER_CONE                  << "\n";
-	std::cout << "Cylinder with spherical cap base: "           << CYLINDER_SPHERICALCAP          << "\n";
+	std::cout << "Cylinder with flat base: "                      << CYLINDER                       << "\n";
+	std::cout << "Cylinder with cone base: "                      << CYLINDER_CONE                  << "\n";
+	std::cout << "Cylinder with spherical cap base: "             << CYLINDER_SPHERICALCAP          << "\n";
 	//std::cout << "Cylinder with truncated cone base: "          << CYLINDER_TRUNCATEDCONE         << "\n";
+	std::cout << "Cylinder Hor "                                  << CYLINDER_HOR << "\n";
 	//std::cout << "Cylinder with truncated spherical cap base: " << CYLINDER_TRUNCATEDSPHERICALCAP << "\n";
 	//std::cout << "Rectangular with flat base: "                 << RECTANGULAR                    << "\n";
 }
@@ -125,6 +126,11 @@ int volumeProgram()
 			needDepth = true;
 			needWidth = true;
 			needBaseH = true;
+			break;
+		case CYLINDER_HOR:
+			vatType = "Spherical-Cap-Based Cylinder";
+			needDepth = true;
+			needWidth = true;
 			break;
 		/*case CUBOID:
 			vatType = "Flat-Based Cuboid";
@@ -257,6 +263,7 @@ int volumeProgram()
 			case CYLINDER: v[i] = cylinderVolume(depth, width, h); break;
 			case CYLINDER_CONE: v[i] = cylinder_ConeVolume(depth, width, baseH, h); break;
 			case CYLINDER_SPHERICALCAP: v[i] = cylinder_SphericalCapVolume(depth, width, baseH, h); break;
+			case CYLINDER_HOR: v[i] = cylinder_horizontal(h, width, depth); break;
 			//case CUBOID: v[i] = rectangularVolume(depth, width, breadth, h); break;
 			//case CUBE: v[i] = rectangularVolume(depth, width, width, h); break;
 			default: return -7;

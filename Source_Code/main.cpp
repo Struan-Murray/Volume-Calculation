@@ -9,18 +9,21 @@
 
 #define USER "SOURCE"
 #define ACCESS "DEV"
-#define VERSION "2020-06-06"
+#define VERSION "THIS WAS SOFTWARE COMPILED INCORRECTLY, REPORT TO ADMIN. ADMIN REPORT TO DEVELOPER." // For full releases only. 
 
 int main()
 {
-	//std::string version = VERSION;
-	std::string compiled = __TIMESTAMP__;
-	std::string compiler = __VERSION__;
-	std::string version = compiled + "(" + compiler + ")";
+	std::string compile_date = __DATE__;
+	std::string compile_time = __TIME__;
+	std::string compiler_version = __VERSION__;
+	std::string version = compile_date + " " + compile_time + " (COMPILER v" + compiler_version + ")";
+
+	//version = VERSION; // Full release versioning
+
 	std::cout << "Version: " << version << "\n";
 
 	// Main variables
-	int ret = 0;
+	int ret = 0; // Error return variable
 
 	// Startup
 	std::cout << "---STARTUP\n";
