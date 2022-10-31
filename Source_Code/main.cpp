@@ -195,9 +195,6 @@ int volumeProgram()
 		return -110;
 	}
 
-	double volume = 0.0;
-	//double step = 1.0;
-
 	// -------------------- Vat Type Numbering --------------------
 
 	enum Vat_Shapes{FLAT = 1   , CONE         , SPHERICALCAP         , TRUNCATEDCONE         , TRUNCATEDSPHERICALCAP         ,
@@ -210,18 +207,18 @@ int volumeProgram()
 	std::cout << "\n";
 	std::cout << "Vat Options\n";
 
-        //std::cout << "Flat: "                                         << FLAT                           << "\n";
-        //std::cout << "Cone: "                                         << CONE                           << "\n";
-        //std::cout << "Spherical Cap: "                                << SPHERICALCAP                   << "\n";
-        //std::cout << "Truncated Cone: "                               << TRUNCATEDCONE                  << "\n";
-        //std::cout << "Truncated Spherical Cap: "                      << TRUNCATEDSPHERICALCAP          << "\n";
-        std::cout << "Cylinder with flat base: "                      << CYLINDER                       << "\n";
-        //std::cout << "Cylinder with cone base: "                      << CYLINDER_CONE                  << "\n";
-        //std::cout << "Cylinder with spherical cap base: "             << CYLINDER_SPHERICALCAP          << "\n";
-        //std::cout << "Cylinder with truncated cone base: "            << CYLINDER_TRUNCATEDCONE         << "\n";
-        std::cout << "Horizontal cylinder with flat base: "           << CYLINDER_HOR                   << "\n";
-        //std::cout << "Cylinder with truncated spherical cap base: "   << CYLINDER_TRUNCATEDSPHERICALCAP << "\n";
-        //std::cout << "Rectangular with flat base: "                   << RECTANGULAR                    << "\n";
+	//std::cout << "Flat: "                                         << FLAT                           << "\n";
+    //std::cout << "Cone: "                                         << CONE                           << "\n";
+    //std::cout << "Spherical Cap: "                                << SPHERICALCAP                   << "\n";
+    //std::cout << "Truncated Cone: "                               << TRUNCATEDCONE                  << "\n";
+    //std::cout << "Truncated Spherical Cap: "                      << TRUNCATEDSPHERICALCAP          << "\n";
+    std::cout << "Cylinder with flat ends: "                      << CYLINDER                       << "\n";
+    //std::cout << "Cylinder with cone base: "                      << CYLINDER_CONE                  << "\n";
+    //std::cout << "Cylinder with spherical cap base: "             << CYLINDER_SPHERICALCAP          << "\n";
+    //std::cout << "Cylinder with truncated cone base: "            << CYLINDER_TRUNCATEDCONE         << "\n";
+    std::cout << "Horizontal cylinder with flat ends: "           << CYLINDER_HOR                   << "\n";
+    //std::cout << "Cylinder with truncated spherical cap base: "   << CYLINDER_TRUNCATEDSPHERICALCAP << "\n";
+    std::cout << "Cuboid: "                                       << RECTANGULAR                    << "\n";
 
 	std::cout << "\n";
 
@@ -235,18 +232,22 @@ int volumeProgram()
 
 	// -------------------- Vat Type Required Variables --------------------
 
-	bool needRadius{false}, needLength{false};
+	bool needHeight{false}, needWidth{false}, needRadius{false}, needLength{false};
 	std::string strVatType = "NULL";
 
 	switch(vat)
 	{
 		case CYLINDER:
-			strVatType = "Flat-Based Cylinder";
+			strVatType = "Cylinder with flat ends";
 			needRadius = true; needLength = true;
 			break;
 		case CYLINDER_HOR:
-			strVatType = "Horizontal Flat-Based Cylinder";
+			strVatType = "Horizontal cylinder with flat ends";
 			needRadius = true; needLength = true;
+			break;
+		case RECTANGULAR:
+			strVatType = "Cuboid";
+			needHeight = true; needWidth = true; needLength = true;
 			break;
 		default:
 			std::cout << "Incompatible type";
@@ -256,13 +257,35 @@ int volumeProgram()
 	// -------------------- Required Variables Input --------------------
 
 	std::string storedVariables = "", tempVariables = "";
+	storedVariables += ("Vat Type:," + strVatType + "\n");
+
+	double height{0.0};
+	if(needHeight)
+	{
+		std::cout << "Enter vat height (" << str_input_unit << "): ";
+		std::cin >> height;
+		storedVariables += ("Height:," + std::to_string(height) + "," + str_input_unit + "\n");
+		logfile << "|Height:" << height;
+		height = abs(height) * to_m_conv;
+	}
+
+	double width{0.0};
+	if(needWidth)
+	{
+		std::cout << "Enter vat width (" << str_input_unit << "): ";
+		std::cin >> width;
+		storedVariables += ("Width:," + std::to_string(width) + "," + str_input_unit + "\n");
+		logfile << "|Width:" << width;
+		width = abs(width) * to_m_conv;
+	}
 
 	double radius{0.0};
 	if(needRadius)
 	{
 		std::cout << "Enter vat radius (" << str_input_unit << "): ";
 		std::cin >> radius;
-		storedVariables += ("Radius:," + std::to_string(radius) + ",mm\n");
+		storedVariables += ("Radius:," + std::to_string(radius) + "," + str_input_unit + "\n");
+		logfile << "|Radius:" << radius;
 		radius = abs(radius) * to_m_conv;
 	}
 
@@ -271,7 +294,8 @@ int volumeProgram()
 	{
 		std::cout << "Enter vat length (" << str_input_unit << "): ";
 		std::cin >> length;
-		storedVariables += ("Length:," + std::to_string(length) + ",mm\n");
+		storedVariables += ("Length:," + std::to_string(length) + "," + str_input_unit + "\n");
+		logfile << "|Length:" << length;
 		length = abs(length) * to_m_conv;
 	}
 
@@ -280,7 +304,8 @@ int volumeProgram()
 	{
 		std::cout << "Enter step size required (" << str_input_unit << "): ";
 		std::cin >> step;
-		storedVariables += ("Step:," + std::to_string(step) + ",mm\n");
+		storedVariables += ("Step:," + std::to_string(step) + "," + str_input_unit + "\n");
+		logfile << "|Step:" << step;
 		step = abs(step) * to_m_conv;
     }
 
@@ -290,6 +315,7 @@ int volumeProgram()
 	{
 		case CYLINDER: depth=length; break;
 		case CYLINDER_HOR: depth=2*radius; break;
+		case RECTANGULAR: depth=height; break;
 	}
 
 	// -------------------- Assign memory for tabling --------------------
@@ -315,6 +341,7 @@ int volumeProgram()
 		{
 			case CYLINDER: v[i] = cylinder_vertical(h, radius); break;
 			case CYLINDER_HOR: v[i] = cylinder_horizontal(h, length, radius); break;
+			case RECTANGULAR: v[i] = cuboid(h,length,width); break;
 			default: return -7;
 		}
 	}
@@ -325,10 +352,13 @@ int volumeProgram()
 
 	vatfile << storedVariables;
 
+	vatfile << "Depth (" << str_input_unit << "),Volume (" << str_output_unit << ")\n";
+
 	for(h = 0.0, i = 0; i < numberOfValues; h+= step, i++)
 	{
-		vatfile << std::scientific << std::setprecision(3) << h*from_m_conv << ",";
-		vatfile << std::fixed << std::setprecision(3) << v[i]*from_m3_conv << "\n";
+		vatfile << std::scientific << std::setprecision(3) << h*from_m_conv << ","; 
+		vatfile << std::fixed << std::setprecision(3) << v[i]*from_m3_conv << ",";
+		vatfile << "\n";
 	}
 
 	// -------------------- Close all --------------------
