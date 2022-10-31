@@ -1,11 +1,16 @@
 #ifndef SHAPEVOLUME_HPP
 #define SHAPEVOLUME_HPP
 
+#include <math.h>
+
 #define PI 3.1415926535
 
 double coneVolume(double height, double width, double h);
 
 double cylinderVolume(double height, double width, double h);
+
+double cylinder_horizontal(double D, double l, double r);
+
 double cylinder_ConeVolume(double height, double width, double coneH, double h);
 double cylinder_SphericalCapVolume(double height, double width, double sphereH, double h);
 
@@ -18,6 +23,10 @@ double coneVolume(double height, double width, double h)
 {
 	double w = h / height * width;
 	return PI * h * (w * w) / 12.0;
+}
+
+double cylinder_horizontal(double D, double l, double r){
+        return l*(r*r/4*acos((r/2-D)/(r/2))-(r/2-D)*sqrt(2*r/2*D-D*D));
 }
 
 

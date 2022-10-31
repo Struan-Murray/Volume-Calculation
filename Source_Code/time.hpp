@@ -14,7 +14,7 @@ intmax_t slowtime(){
 	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 
 	intmax_t iseconds = (intmax_t)seconds;
-	
+
 	return iseconds;
 }
 

@@ -5,7 +5,7 @@ CXXFLAGSFULL:= -O3  -s
 CXXWARNINGS:= -Wall -Weffc++ -Wextra -Wpedantic
 INPUT:= main.cpp
 TITLE:= 'Vat Volume Calculations'
-FILES:= files.cpp #confirm.cpp main.cpp ShapeVolume.hpp
+FILES:= #files_setup.hpp confirm.cpp main.cpp ShapeVolume.hpp
 
 debug: $(INPUT) $(FILES)
 	$(CC) $(INPUT) $(FILES) -o debug $(CXXREQUIREMENTS) $(CXXFLAGSDEBUG) $(CXXWARNINGS)

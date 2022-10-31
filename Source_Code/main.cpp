@@ -1,32 +1,45 @@
-#include "files.hpp"
+#include "files_setup.hpp"
 #include "confirm.hpp"
 #include "shapes.hpp"
 #include "time.hpp"
 
+#include <cmath>
+#include <iostream>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
 
-#define USER "SOURCE"
-#define ACCESS "DEV"
-#define VERSION "2020-06-06"
+#define USER "DEV"
+#define VERSION "UNCERTIFIED"
+
+int intro();
+int volumeProgram();
 
 int main()
 {
-	//std::string version = VERSION;
-	std::string compiled = __TIMESTAMP__;
-	std::string compiler = __VERSION__;
-	std::string version = compiled + "(" + compiler + ")";
-	std::cout << "Version: " << version << "\n";
+	int ret = 0; // Error return variable
 
-	// Main variables
-	int ret = 0;
+	ret = intro(); // Prints intro lines (Title, Version, User)
+	if(ret <= 0){return ret;}
 
+	ret = files_setup(); // Set-up folders and directories
+	if(ret <= 0){return ret;}
+
+	return volumeProgram();
+}
+
+int intro()
+{
+	std::cout << "----- Vat Volume Calculation Program -----\n";
+	std::cout << "Version: " << VERSION << " (" << __DATE__ " " << __TIME__ << ")\n";
+	std::cout << "User:    " << USER << "\n";
+	return 101;
+}
+
+int volumeProgram()
+{
 	// Startup
-	std::cout << "---STARTUP\n";
-
-	ret = files_setup();
-	if(ret != 0){return ret;}
+	std::cout << "-----STARTUP CHECK\n";
 
 	std::fstream logfile;
 
@@ -43,7 +56,7 @@ int main()
 		}
 	}
 	else{
-		std::cout << "Logfile...OK\n";
+		std::cout << "Logfile............OK\n";
 		logfile.open(logpath, std::ios::out|std::ios::app);
 	}
 
@@ -54,12 +67,12 @@ int main()
 
 	logfile << slowtime();
 
-	std::cout << "---STARTUP CHECKS COMPLETE\n\n";
+	std::cout << "-----STARTUP CHECK COMPLETE\n\n";
 
 	// Intro
 
 	std::string user = USER;
-	std::string access = ACCESS;
+	std::string access = "NUL";
 
 	//std::cout << "\x1B[2J\x1B[H";
 	//std::cout << "\n\n\n\n\n";
@@ -67,77 +80,90 @@ int main()
 	std::cout << "User: " + user + "\n";
 	std::cout << "Access: " + access + "\n\n";
 
-	logfile << "|Version:" << version << "|User:" << user << "|Access:" << access; // LOGFILE
-
 	// IO Settings
 
 	int type = 0;
-	double input = 1;
-	std::string inputM = "m";
+	double to_m_conv = 1;
+	double from_m_conv = 1;
+	std::string str_input_unit = "m";
 
 	std::cout << "Input Type\n";
 	std::cout << "Metres      - 1\n";
 	std::cout << "Millimetres - 2\n";
 	std::cout << "Feet        - 3\n";
+	std::cout << "Inches      - 4\n";
 	std::cout << "\nSelection: ";
 	std::cin >> type;
 	std::cout << "\n";
 
 	switch(type){
 		case 1:
-			input = 1;
-			inputM = "m";
+			to_m_conv= 1;
+			from_m_conv = 1/to_m_conv;
+			str_input_unit = "m";
 			break;
 		case 2:
-			input = 0.001;
-			inputM = "mm";
+			to_m_conv= 0.001;
+			from_m_conv = 1/to_m_conv;
+			str_input_unit = "mm";
 			break;
 		case 3:
-			input = 0.3048;
-			inputM = "ft";
+			to_m_conv= 0.3048;
+			from_m_conv = 1/to_m_conv;
+			str_input_unit = "ft";
+			break;
+		case 4:
+			to_m_conv= 0.0254;
+			from_m_conv = 1/to_m_conv;
+			str_input_unit = "in";
 			break;
 
 		// Default Input Case
 		default:
-			input = 1;
-			inputM = "m";
+			to_m_conv= 1;
+			from_m_conv = 1/to_m_conv;
+			str_input_unit = "m";
 	}
 
-	logfile << "|Input:" << input << "(" << inputM << ")"; // LOGFILE
+	logfile << "|Input:" << to_m_conv<< "(" << str_input_unit << ")"; // LOGFILE
 
-	double output = 0;
-	std::string outputM = "";
+	double from_m3_conv = 0;
+	std::string str_output_unit = "";
 
 	std::cout << "Output Type\n";
-	std::cout << "Metres Cubed - 1\n";
-	std::cout << "Litres       - 2\n";
-	std::cout << "Feet Cubed   - 3\n";
+	std::cout << "Metres Cubed   - 1\n";
+	std::cout << "Litres         - 2\n";
+	std::cout << "Cubic Feet     - 3\n";
+	std::cout << "Imperial Pints - 4\n";
 	std::cout << "\nSelection: ";
 	std::cin >> type;
 	std::cout << "\n";
 
 	switch(type){
 		case 1:
-			output = 1;
-			outputM = "m^3";
+			from_m3_conv= 1;
+			str_output_unit = "m^3";
 			break;
 		case 2:
-			output = 1000;
-			outputM = "L";
+			from_m3_conv= 1000;
+			str_output_unit = "L";
 			break;
 		case 3:
-			output = 35.3146667;
-			outputM = "ft^3";
+			from_m3_conv= 35.3146667;
+			str_output_unit = "ft^3";
+			break;
+		case 4:
+			from_m3_conv= 1759.75;
+			str_output_unit = "pt";
 			break;
 
 		// Default Output Case
 		default:
-			output = 1;
-			outputM = "m^3";
+			from_m3_conv= 1;
+			str_output_unit = "m^3";
 	}
 
-	logfile << "|Output:" << output << "(" << outputM << ")"; // LOGFILE
-
+	logfile << "|Output:" << from_m3_conv<< "(" << str_output_unit << ")"; // LOGFILE
 
 	std::string vat_company{"NULL"}, vat_id{"NULL"};
 
@@ -170,26 +196,148 @@ int main()
 	}
 
 	double volume = 0.0;
-	double step = 1.0;
+	//double step = 1.0;
+
+	// -------------------- Vat Type Numbering --------------------
+
+	enum Vat_Shapes{FLAT = 1   , CONE         , SPHERICALCAP         , TRUNCATEDCONE         , TRUNCATEDSPHERICALCAP         ,
+                        CYLINDER   , CYLINDER_CONE, CYLINDER_SPHERICALCAP, CYLINDER_TRUNCATEDCONE, CYLINDER_TRUNCATEDSPHERICALCAP, CYLINDER_HOR,
+                        RECTANGULAR,
+                        END};
+
+	// -------------------- Vat Type Display --------------------
 
 	std::cout << "\n";
 	std::cout << "Vat Options\n";
-	shape_options();
+
+        //std::cout << "Flat: "                                         << FLAT                           << "\n";
+        //std::cout << "Cone: "                                         << CONE                           << "\n";
+        //std::cout << "Spherical Cap: "                                << SPHERICALCAP                   << "\n";
+        //std::cout << "Truncated Cone: "                               << TRUNCATEDCONE                  << "\n";
+        //std::cout << "Truncated Spherical Cap: "                      << TRUNCATEDSPHERICALCAP          << "\n";
+        std::cout << "Cylinder with flat base: "                      << CYLINDER                       << "\n";
+        //std::cout << "Cylinder with cone base: "                      << CYLINDER_CONE                  << "\n";
+        //std::cout << "Cylinder with spherical cap base: "             << CYLINDER_SPHERICALCAP          << "\n";
+        //std::cout << "Cylinder with truncated cone base: "            << CYLINDER_TRUNCATEDCONE         << "\n";
+        std::cout << "Horizontal cylinder with flat base: "           << CYLINDER_HOR                   << "\n";
+        //std::cout << "Cylinder with truncated spherical cap base: "   << CYLINDER_TRUNCATEDSPHERICALCAP << "\n";
+        //std::cout << "Rectangular with flat base: "                   << RECTANGULAR                    << "\n";
+
 	std::cout << "\n";
+
+	// -------------------- Vat Type Input --------------------
+
+	int vat = 0; // Vat type storage variable
+
+	std::cout << "Vat type: ";
+
+	std::cin >> vat;
+
+	// -------------------- Vat Type Required Variables --------------------
+
+	bool needRadius{false}, needLength{false};
+	std::string strVatType = "NULL";
+
+	switch(vat)
+	{
+		case CYLINDER:
+			strVatType = "Flat-Based Cylinder";
+			needRadius = true; needLength = true;
+			break;
+		case CYLINDER_HOR:
+			strVatType = "Horizontal Flat-Based Cylinder";
+			needRadius = true; needLength = true;
+			break;
+		default:
+			std::cout << "Incompatible type";
+			return -5;
+	}
+
+	// -------------------- Required Variables Input --------------------
+
+	std::string storedVariables = "", tempVariables = "";
+
+	double radius{0.0};
+	if(needRadius)
+	{
+		std::cout << "Enter vat radius (" << str_input_unit << "): ";
+		std::cin >> radius;
+		storedVariables += ("Radius:," + std::to_string(radius) + ",mm\n");
+		radius = abs(radius) * to_m_conv;
+	}
+
+	double length{0.0};
+	if(needLength)
+	{
+		std::cout << "Enter vat length (" << str_input_unit << "): ";
+		std::cin >> length;
+		storedVariables += ("Length:," + std::to_string(length) + ",mm\n");
+		length = abs(length) * to_m_conv;
+	}
+
+	double step{0.0};
+	if(true)
+	{
+		std::cout << "Enter step size required (" << str_input_unit << "): ";
+		std::cin >> step;
+		storedVariables += ("Step:," + std::to_string(step) + ",mm\n");
+		step = abs(step) * to_m_conv;
+    }
+
+	double depth{0.0};
+
+	switch(vat)
+	{
+		case CYLINDER: depth=length; break;
+		case CYLINDER_HOR: depth=2*radius; break;
+	}
+
+	// -------------------- Assign memory for tabling --------------------
+
+	long long int numberOfValues = (long long int)(depth / step + 1.0 + 0.1);
+
+	double* v = NULL;
+	v = new (std::nothrow) double[numberOfValues]; // Assign potentially large amount of memory to heap.
+	if(v == NULL)
+	{
+		std::cout << "Array not created\n";
+		return -8;
+	}
+
+	// -------------------- Calculate tabling --------------------
+
+	double h = 0.0;
+	intmax_t i = 0;
+
+	for(h = 0.0, i = 0; i < numberOfValues; h+= step, i++)
+	{
+		switch(vat)
+		{
+			case CYLINDER: v[i] = cylinder_vertical(h, radius); break;
+			case CYLINDER_HOR: v[i] = cylinder_horizontal(h, length, radius); break;
+			default: return -7;
+		}
+	}
+
+	// -------------------- Output data --------------------
 
 	std::cout << "Writing data to: " << filepath << "\n";
 
-	volume = input*input*input*output*cylinder_horizontal(10,3,1.4);
-	std::cout << "Volume: " << volume << " " << outputM << "\n";
+	vatfile << storedVariables;
 
-	// Close All
+	for(h = 0.0, i = 0; i < numberOfValues; h+= step, i++)
+	{
+		vatfile << std::scientific << std::setprecision(3) << h*from_m_conv << ",";
+		vatfile << std::fixed << std::setprecision(3) << v[i]*from_m3_conv << "\n";
+	}
 
+	// -------------------- Close all --------------------
+
+	delete[] v;
 	logfile << "\n";
 	logfile.close();
 	vatfile.close();
+	std::cout << "\a\n"; // End of file bell and space
 
 	return 0;
 }
-
-
-
