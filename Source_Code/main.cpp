@@ -208,7 +208,7 @@ int volumeProgram()
 	std::cout << "Vat Options\n";
 
 	//std::cout << "Flat: "                                         << FLAT                           << "\n";
-    //std::cout << "Cone: "                                         << CONE                           << "\n";
+    std::cout << "Cone: "                                         << CONE                           << "\n";
     //std::cout << "Spherical Cap: "                                << SPHERICALCAP                   << "\n";
     //std::cout << "Truncated Cone: "                               << TRUNCATEDCONE                  << "\n";
     //std::cout << "Truncated Spherical Cap: "                      << TRUNCATEDSPHERICALCAP          << "\n";
@@ -232,11 +232,15 @@ int volumeProgram()
 
 	// -------------------- Vat Type Required Variables --------------------
 
-	bool needHeight{false}, needWidth{false}, needRadius{false}, needLength{false};
+	bool needHeight{false}, needWidth{false}, needRadius{false}, needLength{false}, needDiameter{false};
 	std::string strVatType = "NULL";
 
 	switch(vat)
 	{
+		case CONE:
+			strVatType = "Cone";
+			needDiameter = true; needHeight= true;
+			break;
 		case CYLINDER:
 			strVatType = "Cylinder with flat ends";
 			needRadius = true; needLength = true;
@@ -258,7 +262,18 @@ int volumeProgram()
 
 	std::string storedVariables = "", tempVariables = "";
 	storedVariables += ("Vat Type:," + strVatType + "\n");
+	logfile << "|Type:" << strVatType << ":" << vat;
 
+	double diameter{0.0};
+	if(needDiameter)
+	{
+		std::cout << "Enter vat diameter (" << str_input_unit << "): ";
+		std::cin >> diameter;
+		storedVariables += ("Diameter:," + std::to_string(diameter) + "," + str_input_unit + "\n");
+		logfile << "|Diameter:" << diameter;
+		diameter = abs(diameter) * to_m_conv;
+	}	
+	
 	double height{0.0};
 	if(needHeight)
 	{
@@ -316,6 +331,7 @@ int volumeProgram()
 		case CYLINDER: depth=length; break;
 		case CYLINDER_HOR: depth=2*radius; break;
 		case RECTANGULAR: depth=height; break;
+		case CONE: depth=height; break;
 	}
 
 	// -------------------- Assign memory for tabling --------------------
@@ -342,6 +358,7 @@ int volumeProgram()
 			case CYLINDER: v[i] = cylinder_vertical(h, radius); break;
 			case CYLINDER_HOR: v[i] = cylinder_horizontal(h, length, radius); break;
 			case RECTANGULAR: v[i] = cuboid(h,length,width); break;
+			case CONE: v[i] = cone(h,diameter,height); break;
 			default: return -7;
 		}
 	}

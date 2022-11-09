@@ -8,6 +8,7 @@ const double pi = 3.14159265358979323846264338327950;
 double cylinder_vertical(double D, double r);
 double cylinder_horizontal(double D, double l, double r);
 double cubic(double D, double l, double w);
+double cone(double D, double d, double h);
 
 double cylinder_vertical(double D, double r){
 	return D*pi*r*r;
@@ -17,6 +18,11 @@ double cylinder_horizontal(double D, double l, double r){
 }
 double cuboid(double D, double l, double w){
 	return l*w*D;
+}
+
+double cone(double D, double d, double h){
+	d=D/h*d;
+	return pi*d*d/4/3*D;
 }
 
 #endif
