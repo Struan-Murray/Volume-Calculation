@@ -141,19 +141,19 @@ int volumeProgram()
 
 	switch(type){
 		case 1:
-			from_m3_conv= 1;
+			from_m3_conv = 1.0;
 			str_output_unit = "m^3";
 			break;
 		case 2:
-			from_m3_conv= 1000;
+			from_m3_conv = 1000.0;
 			str_output_unit = "L";
 			break;
 		case 3:
-			from_m3_conv= 35.3146667;
+			from_m3_conv = 35.3146667;
 			str_output_unit = "ft^3";
 			break;
 		case 4:
-			from_m3_conv= 1759.75;
+			from_m3_conv = 1000000.0 / 568.26125;
 			str_output_unit = "pt";
 			break;
 
@@ -197,7 +197,7 @@ int volumeProgram()
 
 	// -------------------- Vat Type Numbering --------------------
 
-	enum Vat_Shapes{FLAT = 1   , CONE         , SPHERICALCAP         , TRUNCATEDCONE         , TRUNCATEDSPHERICALCAP         ,
+	enum Vat_Shapes{FLAT = 1 , CONE, SPHERE, SPHERICALCAP         , TRUNCATEDCONE         , TRUNCATEDSPHERICALCAP         ,
                         CYLINDER   , CYLINDER_CONE, CYLINDER_SPHERICALCAP, CYLINDER_TRUNCATEDCONE, CYLINDER_TRUNCATEDSPHERICALCAP, CYLINDER_HOR,
                         RECTANGULAR,
                         END};
@@ -209,14 +209,15 @@ int volumeProgram()
 
 	//std::cout << "Flat: "                                         << FLAT                           << "\n";
     std::cout << "Cone: "                                         << CONE                           << "\n";
-    //std::cout << "Spherical Cap: "                                << SPHERICALCAP                   << "\n";
+    std::cout << "Sphere: "                                         << SPHERE                           << "\n";
+    std::cout << "Spherical Cap: "                                << SPHERICALCAP                   << "\n";
     //std::cout << "Truncated Cone: "                               << TRUNCATEDCONE                  << "\n";
     //std::cout << "Truncated Spherical Cap: "                      << TRUNCATEDSPHERICALCAP          << "\n";
-    std::cout << "Cylinder with flat ends: "                      << CYLINDER                       << "\n";
+    std::cout << "Vertical Cylinder with flat ends: "                      << CYLINDER                       << "\n";
     //std::cout << "Cylinder with cone base: "                      << CYLINDER_CONE                  << "\n";
     //std::cout << "Cylinder with spherical cap base: "             << CYLINDER_SPHERICALCAP          << "\n";
     //std::cout << "Cylinder with truncated cone base: "            << CYLINDER_TRUNCATEDCONE         << "\n";
-    std::cout << "Horizontal cylinder with flat ends: "           << CYLINDER_HOR                   << "\n";
+    std::cout << "Horizontal Cylinder with flat ends: "           << CYLINDER_HOR                   << "\n";
     //std::cout << "Cylinder with truncated spherical cap base: "   << CYLINDER_TRUNCATEDSPHERICALCAP << "\n";
     std::cout << "Cuboid: "                                       << RECTANGULAR                    << "\n";
 
@@ -238,15 +239,23 @@ int volumeProgram()
 	switch(vat)
 	{
 		case CONE:
-			strVatType = "Cone";
+			strVatType = "Conical Vat";
 			needDiameter = true; needHeight= true;
 			break;
+		case SPHERE:
+			strVatType = "Spherical Vat";
+			needDiameter = true;
+			break;
+		case SPHERICALCAP:
+			strVatType = "Spherical Cap Vat";
+			needWidth = true; needHeight = true;
+			break;
 		case CYLINDER:
-			strVatType = "Cylinder with flat ends";
+			strVatType = "Vertical Cylinder with flat ends";
 			needRadius = true; needLength = true;
 			break;
 		case CYLINDER_HOR:
-			strVatType = "Horizontal cylinder with flat ends";
+			strVatType = "Horizontal Cylinder with flat ends";
 			needRadius = true; needLength = true;
 			break;
 		case RECTANGULAR:
@@ -329,6 +338,8 @@ int volumeProgram()
 	switch(vat)
 	{
 		case CYLINDER: depth=length; break;
+		case SPHERE: depth=diameter; break;
+		case SPHERICALCAP: depth=height; break;
 		case CYLINDER_HOR: depth=2*radius; break;
 		case RECTANGULAR: depth=height; break;
 		case CONE: depth=height; break;
@@ -356,6 +367,8 @@ int volumeProgram()
 		switch(vat)
 		{
 			case CYLINDER: v[i] = cylinder_vertical(h, radius); break;
+			case SPHERE: v[i] = sphere(h,diameter/2.0); break;
+			case SPHERICALCAP: v[i] = spherical_cap(h,height,width/2.0); break;
 			case CYLINDER_HOR: v[i] = cylinder_horizontal(h, length, radius); break;
 			case RECTANGULAR: v[i] = cuboid(h,length,width); break;
 			case CONE: v[i] = cone(h,diameter,height); break;
